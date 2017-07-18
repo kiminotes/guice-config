@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<guice xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://guice.org"
+       xsi:schemaLocation="http://guice.org http://guice.org/schema/guice-config.xsd">
+
+    <property key="binding.selector.guice.config.demo.Hello" value="b,c"/>
+    <property key="binding.selector.guice.config.demo.HelloWorld" value="helloWorld"/>
+
+    <binding id="a" type="guice.config.demo.Hello" implementation="guice.config.demo.HelloA"/>
+    <binding id="b" type="guice.config.demo.Hello" implementation="guice.config.demo.HelloB"/>
+    <binding id="c" type="guice.config.demo.Hello" implementation="guice.config.demo.HelloC"/>
+    <binding id="helloWorld" type="guice.config.demo.HelloWorld"/>
+</guice>

@@ -14,6 +14,7 @@ import java.io.InputStream;
 
 import guice.config.support.LocatableContentHandler;
 import guice.config.support.XmlUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,6 +24,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author <a href="mailto:kiminotes.lv@gmail.com">kimi</a> 2017-06-25
  */
+@Ignore
 public class LineNumberTest {
 
     @Test

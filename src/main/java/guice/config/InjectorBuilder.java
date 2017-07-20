@@ -1,7 +1,9 @@
 package guice.config;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -53,6 +55,7 @@ public class InjectorBuilder {
         final BindingSelector selector = new BindingSelector(properties);
         final List<BindingConfig> selectedBindings = selector.select(bindings);
         final Map<Class<?>, List<BindingConfig>> map = convert(selectedBindings);
+        showBindings(map);
         final Module module = new AbstractModule() {
             @Override
             protected void configure() {
@@ -96,6 +99,34 @@ public class InjectorBuilder {
             list.add(binding);
         }
         return result;
+    }
+
+    void showBindings(final Map<Class<?>, List<BindingConfig>> map) {
+        if (Boolean.getBoolean("show.bindings")
+            && LOG.isInfoEnabled()) {
+            LOG.info(buildBindingString(map));
+        }
+    }
+
+    String buildBindingString(final Map<Class<?>, List<BindingConfig>> map) {
+        final StringBuilder buff = new StringBuilder(128);
+        final int max = maxLength(map.keySet());
+        for (final Map.Entry<Class<?>, List<BindingConfig>> entry : map.entrySet()) {
+            buff.append(entry.getKey().getName());
+            Util.appendIndent(buff, max - entry.getKey().getName().length());
+            buff.append(" -> ")
+                .append(Util.implementationsString(entry.getValue()))
+                .append(Util.NL);
+        }
+        return buff.toString();
+    }
+
+    int maxLength(final Collection<Class<?>> collection) {
+        int max = 0;
+        for (Iterator<Class<?>> iterator = collection.iterator(); iterator.hasNext();) {
+            max = Math.max(max, iterator.next().getName().length());
+        }
+        return max;
     }
 
 }

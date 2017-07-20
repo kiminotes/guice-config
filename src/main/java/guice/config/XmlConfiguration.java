@@ -125,7 +125,9 @@ public class XmlConfiguration {
         binding.setType(typeClass);
         binding.setId(name);
         binding.setImplementation(implementationClass);
-        binding.setScope(scope);
+        if (StringUtils.isNotBlank(scope)) {
+            binding.setScope(scope);
+        }
         builder.register(binding);
     }
 

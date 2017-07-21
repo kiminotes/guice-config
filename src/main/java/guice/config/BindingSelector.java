@@ -87,9 +87,8 @@ class BindingSelector {
     }
 
     void showSelection(final Map<String, Selection> map) {
-        if (Boolean.getBoolean("show.selections")
-            && LOG.isInfoEnabled()) {
-            LOG.info(buildSelectionMessage(map));
+        if (Boolean.getBoolean("show.selections")) {
+            System.out.println(buildSelectionMessage(map));
         }
     }
 
@@ -101,12 +100,12 @@ class BindingSelector {
 
             final String include = Util.implementationsString(entry.getValue().included);
             if (!Strings.isNullOrEmpty(include)) {
-                Util.appendIndent(buf, indent * 2).append("include: {" + include + "}").append(Util.NL);
+                Util.appendIndent(buf, indent * 2).append("include: " + include ).append(Util.NL);
             }
 
             final String exclude = Util.implementationsString(entry.getValue().excluded);
             if (!Strings.isNullOrEmpty(exclude)) {
-                Util.appendIndent(buf, indent * 2).append("exclude: {" + exclude + "}").append(Util.NL);
+                Util.appendIndent(buf, indent * 2).append("exclude: " + exclude).append(Util.NL);
             }
         }
         return buf.toString();

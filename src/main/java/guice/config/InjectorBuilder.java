@@ -102,9 +102,8 @@ public class InjectorBuilder {
     }
 
     void showBindings(final Map<Class<?>, List<BindingConfig>> map) {
-        if (Boolean.getBoolean("show.bindings")
-            && LOG.isInfoEnabled()) {
-            LOG.info(buildBindingString(map));
+        if (Boolean.getBoolean("show.bindings")) {
+            System.out.println(buildBindingString(map));
         }
     }
 

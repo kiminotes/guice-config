@@ -37,6 +37,7 @@ public class BindingSelectorTest {
         bindings.add(bindingB);
         bindings.add(bindingC);
         bindings.add(bindingHW);
+        System.setProperty("show.selections", Boolean.TRUE.toString());
     }
 
     @Test

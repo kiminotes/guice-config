@@ -17,13 +17,19 @@ class Util {
 
         final char separator = ',';
         final StringBuilder buf = new StringBuilder(64);
+        buf.append('{');
         for (int i = 0; i < list.size(); i++) {
-            buf.append(list.get(i).getImplementation().getName()).append(separator);
+            final BindingConfig binding = list.get(i);
+            buf.append(binding.getId())
+                .append(":")
+                .append(binding.getImplementation().getName())
+                .append(separator);
         }
 
         if (buf.length() > 1) {
             buf.setLength(buf.length() - 1);
         }
+        buf.append('}');
         return buf.toString();
     }
 

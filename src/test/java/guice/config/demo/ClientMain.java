@@ -9,6 +9,7 @@ import com.google.inject.Injector;
 public class ClientMain {
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("show.bindings", Boolean.TRUE.toString());
         XmlConfiguration configuration = new XmlConfiguration("demo.xml");
         Injector injector = configuration.build();
         Client client = injector.getInstance(Client.class);

@@ -1,13 +1,10 @@
 package guice.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import com.google.common.base.Preconditions;
@@ -25,7 +22,7 @@ class BindingSelector {
     static final String  PREFIX    = "binding.selector.";
     static final Pattern SEPARATOR = Pattern.compile(",");
 
-    final Map<String, Set<String>> selections = new HashMap<>();
+    final Map<String, List<String>> selections = new HashMap<>();
 
     public BindingSelector(Properties properties) {
         Preconditions.checkNotNull(properties);
@@ -33,44 +30,56 @@ class BindingSelector {
         for (String key : properties.stringPropertyNames()) {
             if (key.length() > PREFIX.length()
                 && key.startsWith(PREFIX)) {
-                addSelections(key.substring(PREFIX.length()),
-                    properties.getProperty(key),
-                    selections);
+                final String value = properties.getProperty(key);
+                if (Strings.isNullOrEmpty(value)) {
+                    continue;
+                }
+                String[] items = SEPARATOR.split(value);
+                for (String item : items) {
+                    Util.addToValue(selections, key.substring(PREFIX.length()), item);
+                }
             }
         }
-    }
-
-    void addSelections(String typeName, String value, Map<String, Set<String>> map) {
-        String[] names = SEPARATOR.split(value);
-        Set<String> set = map.get(typeName);
-        if (set == null) {
-            set = new HashSet<>();
-            map.put(typeName, set);
-        }
-        set.addAll(Arrays.asList(names));
     }
 
     public List<BindingConfig> select(List<BindingConfig> bindings) {
         final List<BindingConfig> result = new ArrayList<>();
         final Map<String, Selection> map = new HashMap<>();
+        final Map<Class<?>, List<BindingConfig>> resultMap = new HashMap<>();
 
         for (int i = 0; i < bindings.size(); i++) {
             BindingConfig binding = bindings.get(i);
             final String typeName = binding.getType().getName();
-            final Set<String> selectionIds = selections.get(typeName);
+            final List<String> selectionIds = selections.get(typeName);
             if (selectionIds == null
                 || selectionIds.contains(binding.getId())) {
-                result.add(binding);
+                Util.addToValue(resultMap, binding.getType(), binding);
             }
 
             putSelection(map, selectionIds, binding);
         }
 
         showSelection(map);
+        // 确保 binding 的顺序与 property 中设置的一致
+        for (Map.Entry<Class<?>, List<BindingConfig>> entry : resultMap.entrySet()) {
+            final List<String> ids = selections.get(entry.getKey().getName());
+            if (ids != null) {
+                List<BindingConfig> value = entry.getValue();
+                for (int i = 0; i < ids.size(); i++) {
+                    for (int j = 0; j < value.size(); j++) {
+                        if (ids.get(i).equals(value.get(j).getId())) {
+                            result.add(value.get(j));
+                        }
+                    }
+                }
+            } else {
+                result.addAll(entry.getValue());
+            }
+        }
         return result;
     }
 
-    void putSelection(final Map<String, Selection> map, Set<String> selectionIds, BindingConfig binding) {
+    void putSelection(final Map<String, Selection> map, List<String> selectionIds, BindingConfig binding) {
         final String typeName = binding.getType().getName();
         if (selectionIds != null) {
             Selection s = map.get(typeName);

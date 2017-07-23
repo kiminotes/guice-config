@@ -60,7 +60,8 @@ public class BindingSelectorTest {
     @Test
     public void test_selectMatchMulti() throws Exception {
         Properties properties = new Properties();
-        buildSelectionProperty(properties, Hello.class, bindingA.getId(), bindingB.getId());
+        final String[] ids = new String[]{bindingC.getId(), bindingB.getId()};
+        buildSelectionProperty(properties, Hello.class, ids);
         buildSelectionProperty(properties, HelloWorld.class, "xxxx");
 
         selector = new BindingSelector(properties);
@@ -70,15 +71,11 @@ public class BindingSelectorTest {
         assertEquals(Hello.class, selections.get(0).getType());
         assertEquals(Hello.class, selections.get(1).getType());
 
-        final Set<String> ids = new HashSet<>();
-        ids.add(bindingA.getId());
-        ids.add(bindingB.getId());
-        assertTrue(ids.remove(selections.get(0).getId()));
-        assertTrue(ids.remove(selections.get(1).getId()));
-        assertTrue(ids.isEmpty());
+        assertEquals(ids[0], selections.get(0).getId());
+        assertEquals(ids[1], selections.get(1).getId());
 
         final Set<Class<?>> impls = new HashSet<>();
-        impls.add(HelloA.class);
+        impls.add(HelloC.class);
         impls.add(HelloB.class);
         assertTrue(impls.remove(selections.get(0).getImplementation()));
         assertTrue(impls.remove(selections.get(1).getImplementation()));

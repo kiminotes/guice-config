@@ -1,6 +1,8 @@
 package guice.config;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:kiminotes.lv@gmail.com">kimi</a> 2017-07-20
@@ -53,6 +55,21 @@ class Util {
         r.setImplementation(impl);
         r.setScope(scope);
         return r;
+    }
+
+    public static <K, T> void addToValue(final Map<K, List<T>> map, final K key, final T ele) {
+        if (map == null
+            || key == null
+            || ele == null) {
+            return;
+        }
+
+        List<T> list = map.get(key);
+        if (list == null) {
+            list = new ArrayList<>();
+            map.put(key, list);
+        }
+        list.add(ele);
     }
 
     private Util() {

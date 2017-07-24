@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author <a href="mailto:kiminotes.lv@gmail.com">kimi</a> 2017-07-18
@@ -92,6 +93,15 @@ public class BindingSelectorTest {
         assertEquals(bindingHW.getId(), selections.get(0).getId());
         assertEquals(HelloWorld.class, selections.get(0).getType());
         assertEquals(HelloWorld.class, selections.get(0).getImplementation());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void test_duplicationInMultiBindings() throws Exception {
+        Properties properties = new Properties();
+        buildSelectionProperty(properties, Hello.class, "a", "b", "a");
+
+        selector = new BindingSelector(properties);
+        fail();
     }
 
     void buildSelectionProperty(Properties properties, Class<?> cl, String... ids) {

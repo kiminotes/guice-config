@@ -31,15 +31,24 @@ class BindingSelector {
             if (key.length() > PREFIX.length()
                 && key.startsWith(PREFIX)) {
                 final String value = properties.getProperty(key);
+                final String type = key.substring(PREFIX.length());
                 if (Strings.isNullOrEmpty(value)) {
                     continue;
                 }
                 String[] items = SEPARATOR.split(value);
                 for (String item : items) {
-                    Util.addToValue(selections, key.substring(PREFIX.length()), item);
+                    if (exists(selections, type, item)) {
+                        throw new IllegalArgumentException("Duplicate binding id '" + item + "' for type " + type);
+                    }
+                    Util.addToValue(selections, type, item);
                 }
             }
         }
+    }
+
+    boolean exists(final Map<String, List<String>> map, String key, String item) {
+        final List<String> value = map.get(key);
+        return value != null && value.contains(item);
     }
 
     public List<BindingConfig> select(List<BindingConfig> bindings) {

@@ -13,6 +13,7 @@ public class BindingConfig implements Serializable {
     Class<?> implementation;
     String   id;
     String   scope;
+    String   name;
 
     public Class<?> getType() {
         return type;
@@ -46,21 +47,32 @@ public class BindingConfig implements Serializable {
         this.scope = scope;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // type, implementation, name 参与 equals 运算
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BindingConfig config = (BindingConfig) o;
+        BindingConfig that = (BindingConfig) o;
 
-        if (type != null ? !type.equals(config.type) : config.type != null) return false;
-        return implementation != null ? implementation.equals(config.implementation) : config.implementation == null;
+        if (!type.equals(that.type)) return false;
+        if (!implementation.equals(that.implementation)) return false;
+        return name != null ? name.equals(that.name) : that.name == null;
     }
 
     @Override
     public int hashCode() {
-        int result = type != null ? type.hashCode() : 0;
-        result = 31 * result + (implementation != null ? implementation.hashCode() : 0);
+        int result = type.hashCode();
+        result = 31 * result + implementation.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
 

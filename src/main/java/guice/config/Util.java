@@ -49,11 +49,16 @@ class Util {
     }
 
     public static BindingConfig create(Class<?> type, String id, Class<?> impl, String scope) {
+        return create(type, id, impl, scope, null);
+    }
+
+    public static BindingConfig create(Class<?> type, String id, Class<?> impl, String scope, String name) {
         BindingConfig r = new BindingConfig();
         r.setType(type);
         r.setId(id);
         r.setImplementation(impl);
         r.setScope(scope);
+        r.setName(name);
         return r;
     }
 

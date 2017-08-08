@@ -9,10 +9,15 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.binder.AnnotatedBindingBuilder;
+import com.google.inject.binder.LinkedBindingBuilder;
 import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,17 +69,9 @@ public class InjectorBuilder {
                     final List<BindingConfig> value = entry.getValue();
                     // FIXME scope
                     if (value.size() == 1) {
-                        final BindingConfig binding = value.get(0);
-                        if (binding.getType().equals(binding.getImplementation())) {
-                            bind(binding.getType());
-                        } else {
-                            bind(binding.getType()).to((Class) binding.getImplementation());
-                        }
+                        buildBinding(binder(), value.get(0));
                     } else if (value.size() > 1) {
-                        Multibinder multibinder = Multibinder.newSetBinder(binder(), (Class) key);
-                        for (int i = 0; i < value.size(); i++) {
-                            multibinder.addBinding().to(value.get(i).getImplementation());
-                        }
+                        buildMultibinding(binder(), entry.getKey(), entry.getValue());
                     } else {
                         if (LOG.isWarnEnabled()) {
                             LOG.warn("Unknown how to config bindings: " + key + " -> " + value);
@@ -85,6 +82,29 @@ public class InjectorBuilder {
         };
         injector = Guice.createInjector(module);
         return injector;
+    }
+
+    void buildBinding(Binder binder, BindingConfig binding) {
+        AnnotatedBindingBuilder annotatedBindingBuilder = binder.bind(binding.getType());
+        LinkedBindingBuilder linkedBindingBuilder = null;
+        if (StringUtils.isNotBlank(binding.getName())) {
+            linkedBindingBuilder = annotatedBindingBuilder.annotatedWith(Names.named(binding.getName()));
+        }
+
+        if (linkedBindingBuilder == null) {
+            linkedBindingBuilder = annotatedBindingBuilder;
+        }
+
+        if (!binding.getType().equals(binding.getImplementation())) {
+            linkedBindingBuilder.to(binding.getImplementation());
+        }
+    }
+
+    void buildMultibinding(Binder binder, Class<?> type, List<BindingConfig> list) {
+        Multibinder multibinder = Multibinder.newSetBinder(binder, (Class) type);
+        for (int i = 0; i < list.size(); i++) {
+            multibinder.addBinding().to(list.get(i).getImplementation());
+        }
     }
 
     Map<Class<?>, List<BindingConfig>> convert(List<BindingConfig> bindings) {

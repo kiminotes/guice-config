@@ -15,6 +15,7 @@
         <xsd:attribute name="type" type="xsd:string" use="required"/>
         <xsd:attribute name="implementation" type="xsd:string"/>
         <xsd:attribute name="scope" type="xsd:string"/>
+        <xsd:attribute name="name" type="xsd:string"/>
     </xsd:complexType>
 
     <xsd:complexType name="guiceType">

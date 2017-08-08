@@ -101,10 +101,11 @@ public class XmlConfiguration {
     }
 
     void parseBinding(InjectorBuilder builder, Element element) throws ClassNotFoundException {
-        String type = element.getAttribute("type");
-        String name = element.getAttribute("id");
-        String implementation = element.getAttribute("implementation");
-        String scope = element.getAttribute("scope");
+        final String type = getAttribute(element, "type");
+        final String id = getAttribute(element, "id");
+        final String implementation = getAttribute(element, "implementation");
+        final String scope = getAttribute(element, "scope");
+        final String name = getAttribute(element, "name");
 
         if (StringUtils.isBlank(type)) {
             throw new IllegalStateException("type is empty");
@@ -123,12 +124,20 @@ public class XmlConfiguration {
 
         BindingConfig binding = new BindingConfig();
         binding.setType(typeClass);
-        binding.setId(name);
+        binding.setId(id);
         binding.setImplementation(implementationClass);
-        if (StringUtils.isNotBlank(scope)) {
-            binding.setScope(scope);
-        }
+        binding.setScope(scope);
+        binding.setName(name);
         builder.register(binding);
+    }
+
+    String getAttribute(Element element, String attributeName) {
+        final String attributeValue = element.getAttribute(attributeName);
+        if (StringUtils.isBlank(attributeValue)) {
+            return null;
+        } else {
+            return attributeValue;
+        }
     }
 
     Document loadDocument(InputStream is) throws Exception {

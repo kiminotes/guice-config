@@ -86,13 +86,9 @@ public class InjectorBuilder {
 
     void buildBinding(Binder binder, BindingConfig binding) {
         AnnotatedBindingBuilder annotatedBindingBuilder = binder.bind(binding.getType());
-        LinkedBindingBuilder linkedBindingBuilder = null;
+        LinkedBindingBuilder linkedBindingBuilder = annotatedBindingBuilder;
         if (StringUtils.isNotBlank(binding.getName())) {
             linkedBindingBuilder = annotatedBindingBuilder.annotatedWith(Names.named(binding.getName()));
-        }
-
-        if (linkedBindingBuilder == null) {
-            linkedBindingBuilder = annotatedBindingBuilder;
         }
 
         if (!binding.getType().equals(binding.getImplementation())) {

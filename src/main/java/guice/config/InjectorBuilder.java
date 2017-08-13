@@ -37,14 +37,14 @@ public class InjectorBuilder {
         super();
     }
 
-    public void register(BindingConfig binding) {
+    public synchronized void register(BindingConfig binding) {
         if (bindings.contains(binding)) {
             throw new IllegalStateException("Duplicate bindings " + binding);
         }
         bindings.add(binding);
     }
 
-    public Object setProperty(String key, String value) {
+    public synchronized Object setProperty(String key, String value) {
         return properties.setProperty(key, value);
     }
 
@@ -52,11 +52,7 @@ public class InjectorBuilder {
         return properties.getProperty(key);
     }
 
-    public synchronized Injector build() {
-        if (injector != null) {
-            return injector;
-        }
-
+    public synchronized Module module() {
         final BindingSelector selector = new BindingSelector(properties);
         final List<BindingConfig> selectedBindings = selector.select(bindings);
         final Map<Class<?>, List<BindingConfig>> map = convert(selectedBindings);
@@ -80,6 +76,15 @@ public class InjectorBuilder {
                 }
             }
         };
+        return module;
+    }
+
+    public synchronized Injector build() {
+        if (injector != null) {
+            return injector;
+        }
+
+        final Module module = module();
         injector = Guice.createInjector(module);
         return injector;
     }

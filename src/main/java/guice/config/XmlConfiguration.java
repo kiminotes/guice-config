@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import com.google.inject.Injector;
+import com.google.inject.Module;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -45,6 +46,10 @@ public class XmlConfiguration {
 
     public Injector build() {
         return builder.build();
+    }
+
+    public Module module() {
+        return builder.module();
     }
 
     void init(String[] resources, ClassLoader classLoader) throws Exception {

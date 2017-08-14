@@ -31,6 +31,7 @@ public class InjectorBuilder {
     final List<BindingConfig> bindings   = new ArrayList<>();
     final Properties          properties = new Properties();
 
+    Module   module;
     Injector injector;
 
     public InjectorBuilder() {
@@ -53,6 +54,10 @@ public class InjectorBuilder {
     }
 
     public synchronized Module module() {
+        if (module != null) {
+            return module;
+        }
+
         final BindingSelector selector = new BindingSelector(properties);
         final List<BindingConfig> selectedBindings = selector.select(bindings);
         final Map<Class<?>, List<BindingConfig>> map = convert(selectedBindings);

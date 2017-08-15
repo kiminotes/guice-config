@@ -44,6 +44,29 @@ public class InjectorBuilder {
         return new XmlConfiguration(resources, classLoader).module();
     }
 
+    public static Injector buildInjector(List<BindingConfig> bindings) {
+        final InjectorBuilder builder = create(bindings);
+        return builder == null ? null : builder.build();
+    }
+
+    public static Module buildModule(List<BindingConfig> bindings) {
+        final InjectorBuilder builder = create(bindings);
+        return builder == null ? null : builder.module;
+    }
+
+    static InjectorBuilder create(List<BindingConfig> bindings) {
+        if (bindings == null
+            || bindings.isEmpty()) {
+            return null;
+        }
+
+        final InjectorBuilder builder = new InjectorBuilder();
+        for (int i = 0; i < bindings.size(); i++) {
+            builder.register(bindings.get(i));
+        }
+        return builder;
+    }
+
     final List<BindingConfig> bindings   = new ArrayList<>();
     final Properties          properties = new Properties();
 

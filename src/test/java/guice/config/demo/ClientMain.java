@@ -1,6 +1,6 @@
 package guice.config.demo;
 
-import guice.config.XmlConfiguration;
+import guice.config.InjectorBuilder;
 import com.google.inject.Injector;
 
 /**
@@ -10,8 +10,7 @@ public class ClientMain {
 
     public static void main(String[] args) throws Exception {
         System.setProperty("show.bindings", Boolean.TRUE.toString());
-        XmlConfiguration configuration = new XmlConfiguration("demo.xml");
-        Injector injector = configuration.build();
+        Injector injector = InjectorBuilder.buildInjector("demo.xml");
         Client client = injector.getInstance(Client.class);
         System.out.println(client.hello);
         System.out.println(client.helloWorld);

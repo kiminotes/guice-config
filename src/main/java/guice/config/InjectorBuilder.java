@@ -28,32 +28,48 @@ public class InjectorBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(InjectorBuilder.class);
 
+    public static Injector buildInjector(String... resources) throws Exception {
+        return buildInjector(resources, null);
+    }
+
+    public static Injector buildInjector(String[] resources, ClassLoader classLoader) throws Exception {
+        return new XmlConfiguration(resources, classLoader).build();
+    }
+
+    public static Module buildModule(String... resources) throws Exception {
+        return buildModule(resources, null);
+    }
+
+    public static Module buildModule(String[] resources, ClassLoader classLoader) throws Exception {
+        return new XmlConfiguration(resources, classLoader).module();
+    }
+
     final List<BindingConfig> bindings   = new ArrayList<>();
     final Properties          properties = new Properties();
 
     Module   module;
     Injector injector;
 
-    public InjectorBuilder() {
+    InjectorBuilder() {
         super();
     }
 
-    public synchronized void register(BindingConfig binding) {
+    synchronized void register(BindingConfig binding) {
         if (bindings.contains(binding)) {
             throw new IllegalStateException("Duplicate bindings " + binding);
         }
         bindings.add(binding);
     }
 
-    public synchronized Object setProperty(String key, String value) {
+    synchronized Object setProperty(String key, String value) {
         return properties.setProperty(key, value);
     }
 
-    public String getProperty(String key) {
+    String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    public synchronized Module module() {
+    synchronized Module module() {
         if (module != null) {
             return module;
         }
@@ -84,7 +100,7 @@ public class InjectorBuilder {
         return module;
     }
 
-    public synchronized Injector build() {
+    synchronized Injector build() {
         if (injector != null) {
             return injector;
         }

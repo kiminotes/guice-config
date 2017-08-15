@@ -20,7 +20,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author <a href="mailto:kiminotes.lv@gmail.com">kimi</a> 2017-06-26
  */
-public class XmlConfiguration {
+class XmlConfiguration {
 
     private static final Logger LOG = LoggerFactory.getLogger(XmlConfiguration.class);
 

@@ -99,13 +99,13 @@ public class InjectorBuilder {
 
         final BindingSelector selector = new BindingSelector(properties);
         final List<BindingConfig> selectedBindings = selector.select(bindings);
-        final Map<Class<?>, List<BindingConfig>> map = convert(selectedBindings);
+        final Map<BindingKey, List<BindingConfig>> map = convert(selectedBindings);
         showBindings(map);
         final Module module = new AbstractModule() {
             @Override
             protected void configure() {
-                for (Map.Entry<Class<?>, List<BindingConfig>> entry : map.entrySet()) {
-                    final Class<?> key = entry.getKey();
+                for (Map.Entry<BindingKey, List<BindingConfig>> entry : map.entrySet()) {
+                    final BindingKey key = entry.getKey();
                     final List<BindingConfig> value = entry.getValue();
                     // FIXME scope
                     if (value.size() == 1) {
@@ -145,39 +145,40 @@ public class InjectorBuilder {
         }
     }
 
-    void buildMultibinding(Binder binder, Class<?> type, List<BindingConfig> list) {
-        Multibinder multibinder = Multibinder.newSetBinder(binder, (Class) type);
+    void buildMultibinding(Binder binder, BindingKey key, List<BindingConfig> list) {
+        Multibinder multibinder = Multibinder.newSetBinder(binder, (Class) key.type);
         for (int i = 0; i < list.size(); i++) {
             multibinder.addBinding().to(list.get(i).getImplementation());
         }
     }
 
-    Map<Class<?>, List<BindingConfig>> convert(List<BindingConfig> bindings) {
-        final Map<Class<?>, List<BindingConfig>> result = new HashMap<>();
+    Map<BindingKey, List<BindingConfig>> convert(List<BindingConfig> bindings) {
+        final Map<BindingKey, List<BindingConfig>> result = new HashMap<>(bindings.size());
         for (int i = 0; i < bindings.size(); i++) {
             final BindingConfig binding = bindings.get(i);
-            List<BindingConfig> list = result.get(binding.getType());
+            final BindingKey key = new BindingKey(binding.getType(), binding.getName());
+            List<BindingConfig> list = result.get(key);
             if (list == null) {
-                result.put(binding.getType(), new ArrayList<>());
-                list = result.get(binding.getType());
+                result.put(key, new ArrayList<>());
+                list = result.get(key);
             }
             list.add(binding);
         }
         return result;
     }
 
-    void showBindings(final Map<Class<?>, List<BindingConfig>> map) {
+    void showBindings(final Map<BindingKey, List<BindingConfig>> map) {
         if (Boolean.getBoolean("show.bindings")) {
             System.out.println(buildBindingString(map));
         }
     }
 
-    String buildBindingString(final Map<Class<?>, List<BindingConfig>> map) {
+    String buildBindingString(final Map<BindingKey, List<BindingConfig>> map) {
         final StringBuilder buff = new StringBuilder(128);
         final int max = maxLength(map.keySet());
-        for (final Map.Entry<Class<?>, List<BindingConfig>> entry : map.entrySet()) {
-            buff.append(entry.getKey().getName());
-            Util.appendIndent(buff, max - entry.getKey().getName().length());
+        for (final Map.Entry<BindingKey, List<BindingConfig>> entry : map.entrySet()) {
+            buff.append(entry.getKey().type.getName());
+            Util.appendIndent(buff, max - entry.getKey().type.getName().length());
             buff.append(" -> ")
                 .append(Util.implementationsString(entry.getValue()))
                 .append(Util.NL);
@@ -185,12 +186,40 @@ public class InjectorBuilder {
         return buff.toString();
     }
 
-    int maxLength(final Collection<Class<?>> collection) {
+    int maxLength(final Collection<BindingKey> collection) {
         int max = 0;
-        for (Iterator<Class<?>> iterator = collection.iterator(); iterator.hasNext();) {
-            max = Math.max(max, iterator.next().getName().length());
+        for (Iterator<BindingKey> iterator = collection.iterator(); iterator.hasNext();) {
+            max = Math.max(max, iterator.next().type.getName().length());
         }
         return max;
+    }
+
+    class BindingKey {
+        final Class<?> type;
+        final String name;
+
+        public BindingKey(Class<?> type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BindingKey that = (BindingKey) o;
+
+            if (!type.equals(that.type)) return false;
+            return name != null ? name.equals(that.name) : that.name == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = type.hashCode();
+            result = 31 * result + (name != null ? name.hashCode() : 0);
+            return result;
+        }
     }
 
 }

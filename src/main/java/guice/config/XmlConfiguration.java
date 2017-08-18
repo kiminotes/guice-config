@@ -101,8 +101,16 @@ class XmlConfiguration {
     void parseProperty(InjectorBuilder builder, Element element) {
         String key = element.getAttribute("key");
         String value = element.getAttribute("value");
-        // FIXME duplicate property
-        builder.setProperty(key, value);
+        final Object old = builder.setProperty(key, value);
+        if (old != null
+            && errorIfDup()) {
+            throw new IllegalStateException("Duplicate property " + key);
+        }
+    }
+
+    boolean errorIfDup() {
+        return Boolean.TRUE.toString().equalsIgnoreCase(
+            System.getProperty("error.if.duplicate.property", Boolean.TRUE.toString()));
     }
 
     void parseBinding(InjectorBuilder builder, Element element) throws ClassNotFoundException {

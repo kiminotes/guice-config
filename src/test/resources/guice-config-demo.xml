@@ -3,6 +3,6 @@
 <guice xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns="http://guice.org"
        xsi:schemaLocation="http://guice.org http://guice.org/schema/guice-config.xsd">
-    <property key="key" value="value"/>
+    <selector type="key" selection="value"/>
     <binding type="type" id="id" implementation="impl" scope="scope"/>
 </guice>

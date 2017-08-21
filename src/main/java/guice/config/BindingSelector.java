@@ -19,7 +19,6 @@ class BindingSelector {
 
     static final Logger LOG = LoggerFactory.getLogger(BindingSelector.class);
 
-    static final String  PREFIX    = "binding.selector.";
     static final Pattern SEPARATOR = Pattern.compile(",");
 
     final Map<String, List<String>> selections = new HashMap<>();
@@ -27,21 +26,17 @@ class BindingSelector {
     public BindingSelector(Properties properties) {
         Preconditions.checkNotNull(properties);
 
-        for (String key : properties.stringPropertyNames()) {
-            if (key.length() > PREFIX.length()
-                && key.startsWith(PREFIX)) {
-                final String value = properties.getProperty(key);
-                final String type = key.substring(PREFIX.length());
-                if (Strings.isNullOrEmpty(value)) {
-                    continue;
+        for (String type : properties.stringPropertyNames()) {
+            final String selection = properties.getProperty(type);
+            if (Strings.isNullOrEmpty(selection)) {
+                continue;
+            }
+            String[] items = SEPARATOR.split(selection);
+            for (String item : items) {
+                if (exists(selections, type, item)) {
+                    throw new IllegalArgumentException("Duplicate binding id '" + item + "' for type " + type);
                 }
-                String[] items = SEPARATOR.split(value);
-                for (String item : items) {
-                    if (exists(selections, type, item)) {
-                        throw new IllegalArgumentException("Duplicate binding id '" + item + "' for type " + type);
-                    }
-                    Util.addToValue(selections, type, item);
-                }
+                Util.addToValue(selections, type, item);
             }
         }
     }

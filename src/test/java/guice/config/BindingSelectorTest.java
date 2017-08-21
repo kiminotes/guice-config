@@ -106,7 +106,7 @@ public class BindingSelectorTest {
 
     void buildSelectionProperty(Properties properties, Class<?> cl, String... ids) {
         final String value = buildSelectionValue(BindingSelector.SEPARATOR.pattern(), ids);
-        properties.setProperty(BindingSelector.PREFIX + cl.getName(), value);
+        properties.setProperty(cl.getName(), value);
     }
 
     String buildSelectionValue(String separator, String... ids) {

@@ -85,7 +85,7 @@ class XmlConfiguration {
             Node node = children.item(i);
             if (Node.ELEMENT_NODE == node.getNodeType()) {
                 Element element = (Element) node;
-                if ("property".equals(element.getTagName())) {
+                if ("selector".equals(element.getTagName())) {
                     parseProperty(builder, element);
                 } else if ("binding".equals(element.getTagName())) {
                     parseBinding(builder, element);
@@ -99,9 +99,9 @@ class XmlConfiguration {
     }
 
     void parseProperty(InjectorBuilder builder, Element element) {
-        String key = element.getAttribute("key");
-        String value = element.getAttribute("value");
-        final Object old = builder.setProperty(key, value);
+        String key = element.getAttribute("type");
+        String value = element.getAttribute("selection");
+        final Object old = builder.addSelection(key, value);
         if (old != null
             && errorIfDup()) {
             throw new IllegalStateException("Duplicate property " + key);

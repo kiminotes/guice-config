@@ -68,7 +68,7 @@ public class InjectorBuilder {
     }
 
     final List<BindingConfig> bindings   = new ArrayList<>();
-    final Properties          properties = new Properties();
+    final Properties          selections = new Properties();
 
     Module   module;
     Injector injector;
@@ -84,12 +84,12 @@ public class InjectorBuilder {
         bindings.add(binding);
     }
 
-    synchronized Object setProperty(String key, String value) {
-        return properties.setProperty(key, value);
+    synchronized Object addSelection(String type, String selection) {
+        return selections.setProperty(type, selection);
     }
 
-    String getProperty(String key) {
-        return properties.getProperty(key);
+    String getSelection(String type) {
+        return selections.getProperty(type);
     }
 
     synchronized Module module() {
@@ -97,7 +97,7 @@ public class InjectorBuilder {
             return module;
         }
 
-        final BindingSelector selector = new BindingSelector(properties);
+        final BindingSelector selector = new BindingSelector(selections);
         final List<BindingConfig> selectedBindings = selector.select(bindings);
         final Map<BindingKey, List<BindingConfig>> map = convert(selectedBindings);
         showBindings(map);

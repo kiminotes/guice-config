@@ -7,15 +7,15 @@ import java.util.List;
  */
 public class ExtensionFactoryBuilder {
 
-    public static ExtensionFactory getExtensionFactory(String... resources) throws Exception {
+    public static ExtensionFactory buildExtensionFactory(String... resources) throws Exception {
         return new DefaultExtensionFactory(InjectorBuilder.buildInjector(resources));
     }
 
-    public static ExtensionFactory getExtensionFactory(String[] resources, ClassLoader classLoader) throws Exception {
+    public static ExtensionFactory buildExtensionFactory(String[] resources, ClassLoader classLoader) throws Exception {
         return new DefaultExtensionFactory(InjectorBuilder.buildInjector(resources, classLoader));
     }
 
-    public static ExtensionFactory getExtensionFactory(final List<BindingConfig> bindings) {
+    public static ExtensionFactory buildExtensionFactory(final List<BindingConfig> bindings) {
         return new DefaultExtensionFactory(InjectorBuilder.buildInjector(bindings));
     }
 

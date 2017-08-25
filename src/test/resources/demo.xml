@@ -4,8 +4,8 @@
        xmlns="http://guice.org"
        xsi:schemaLocation="http://guice.org http://guice.org/schema/guice-config.xsd">
 
-    <selector type="binding.selector.guice.config.demo.Hello" selection="b,c"/>
-    <selector type="binding.selector.guice.config.demo.HelloWorld" selection="helloWorld"/>
+    <selector type="guice.config.demo.Hello" selection="b,c"/>
+    <selector type="guice.config.demo.HelloWorld" selection="helloWorld"/>
 
     <binding id="a" type="guice.config.demo.Hello" implementation="guice.config.demo.HelloA"/>
     <binding id="b" type="guice.config.demo.Hello" implementation="guice.config.demo.HelloB"/>

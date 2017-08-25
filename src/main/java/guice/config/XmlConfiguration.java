@@ -60,12 +60,12 @@ class XmlConfiguration {
         for (String resource : resources) {
             Enumeration<URL> enumeration = classLoader.getResources(resource);
             while (enumeration.hasMoreElements()) {
-                loadConfig(builder, enumeration.nextElement());
+                loadConfig(enumeration.nextElement(), classLoader);
             }
         }
     }
 
-    void loadConfig(InjectorBuilder builder, URL config) throws Exception {
+    void loadConfig(URL config, ClassLoader loader) throws Exception {
         InputStream is;
         Document doc;
         is = config.openStream();
@@ -75,36 +75,36 @@ class XmlConfiguration {
             is.close();
         }
 
-        parse(builder, doc);
+        parse(new ParseContext(config, doc, loader));
     }
 
-    void parse(InjectorBuilder builder, Document doc) throws ClassNotFoundException {
-        Element root = doc.getDocumentElement();
+    void parse(ParseContext context) throws ClassNotFoundException {
+        Element root = context.document.getDocumentElement();
         NodeList children = root.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
             if (Node.ELEMENT_NODE == node.getNodeType()) {
-                Element element = (Element) node;
-                if ("selector".equals(element.getTagName())) {
-                    parseProperty(builder, element);
-                } else if ("binding".equals(element.getTagName())) {
-                    parseBinding(builder, element);
+                context.element = (Element) node;
+                if ("selector".equals(context.element.getTagName())) {
+                    parseProperty(context);
+                } else if ("binding".equals(context.element.getTagName())) {
+                    parseBinding(context);
                 } else {
                     if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unsupported element " + element.getTagName());
+                        LOG.warn("Unsupported element " + context.element.getTagName() + " in " + context.url);
                     }
                 }
             }
         }
     }
 
-    void parseProperty(InjectorBuilder builder, Element element) {
-        String key = element.getAttribute("type");
-        String value = element.getAttribute("selection");
+    void parseProperty(ParseContext context) {
+        String key = context.element.getAttribute("type");
+        String value = context.element.getAttribute("selection");
         final Object old = builder.addSelection(key, value);
         if (old != null
             && errorIfDup()) {
-            throw new IllegalStateException("Duplicate property " + key);
+            throw new IllegalStateException("Duplicate property " + key + " in " + context.url);
         }
     }
 
@@ -113,23 +113,24 @@ class XmlConfiguration {
             System.getProperty("error.if.duplicate.property", Boolean.TRUE.toString()));
     }
 
-    void parseBinding(InjectorBuilder builder, Element element) throws ClassNotFoundException {
-        final String type = getAttribute(element, "type");
-        final String id = getAttribute(element, "id");
-        final String implementation = getAttribute(element, "implementation");
-        final String scope = getAttribute(element, "scope");
-        final String name = getAttribute(element, "name");
+    void parseBinding(ParseContext context) throws ClassNotFoundException {
+        final String type = getAttribute(context.element, "type");
+        final String id = getAttribute(context.element, "id");
+        final String implementation = getAttribute(context.element, "implementation");
+        final String scope = getAttribute(context.element, "scope");
+        final String name = getAttribute(context.element, "name");
 
         if (StringUtils.isBlank(type)) {
-            throw new IllegalStateException("type is empty");
+            throw new IllegalStateException("type is empty in " + context.url);
         }
 
-        Class<?> typeClass = ClassUtils.getClass(type);
+        Class<?> typeClass = loadClass(context, type);
         Class<?> implementationClass;
         if (StringUtils.isNotBlank(implementation)) {
-            implementationClass = ClassUtils.getClass(implementation);
+            implementationClass = loadClass(context, implementation);
             if (!typeClass.isAssignableFrom(implementationClass)) {
-                throw new IllegalStateException("class " + implementation + " is not subclass of " + type);
+                throw new IllegalStateException("class " + implementation + " is not subclass of "
+                    + type + " in " + context.url);
             }
         } else {
             implementationClass = typeClass;
@@ -144,6 +145,14 @@ class XmlConfiguration {
         builder.register(binding);
     }
 
+    Class<?> loadClass(ParseContext context, String name) throws ClassNotFoundException {
+        if (context.classLoader != null) {
+            return ClassUtils.getClass(context.classLoader, name);
+        } else {
+            return ClassUtils.getClass(name);
+        }
+    }
+
     String getAttribute(Element element, String attributeName) {
         final String attributeValue = element.getAttribute(attributeName);
         if (StringUtils.isBlank(attributeValue)) {
@@ -154,10 +163,23 @@ class XmlConfiguration {
     }
 
     Document loadDocument(InputStream is) throws Exception {
-        // FIXME add schema validate
+        // FIXME add schema validate and line number support
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         return builder.parse(is);
+    }
+
+    class ParseContext {
+        final URL url;
+        final Document document;
+        final ClassLoader classLoader;
+        Element element;
+
+        public ParseContext(URL url, Document document, ClassLoader classLoader) {
+            this.url = url;
+            this.document = document;
+            this.classLoader = classLoader;
+        }
     }
 
 }
